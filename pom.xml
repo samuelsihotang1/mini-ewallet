@@ -133,4 +133,14 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <!-- Cucumber scenarios against the running compose stack: ./mvnw -Pe2e -pl e2e-tests verify -->
+    <profile>
+      <id>e2e</id>
+      <modules>
+        <module>e2e-tests</module>
+      </modules>
+    </profile>
+  </profiles>
 </project>
