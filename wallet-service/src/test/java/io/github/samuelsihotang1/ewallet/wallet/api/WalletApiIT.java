@@ -147,6 +147,7 @@ class WalletApiIT {
     assertThat(response.getBody()).contains("/api/v1/wallets/{walletId}/top-ups");
   }
 
+
   private static String newUser() {
     return "user-" + UUID.randomUUID();
   }
