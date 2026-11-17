@@ -20,6 +20,7 @@
 
   <modules>
     <module>common-events</module>
+    <module>common-messaging</module>
     <module>wallet-service</module>
     <module>transfer-service</module>
     <module>notification-service</module>
@@ -39,6 +40,11 @@
       <dependency>
         <groupId>io.github.samuelsihotang1.ewallet</groupId>
         <artifactId>common-events</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.github.samuelsihotang1.ewallet</groupId>
+        <artifactId>common-messaging</artifactId>
         <version>${project.version}</version>
       </dependency>
       <dependency>
