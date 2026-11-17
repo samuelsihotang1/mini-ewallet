@@ -1,0 +1,14 @@
+# Build output
+target/
+*.class
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.DS_Store
+
+# Local env and load-test output
+.env
+loadtest/results/
