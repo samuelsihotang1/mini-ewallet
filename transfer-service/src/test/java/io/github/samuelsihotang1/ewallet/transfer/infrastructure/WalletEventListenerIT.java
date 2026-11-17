@@ -52,7 +52,7 @@ class WalletEventListenerIT {
         Money.of("40.00"),
         "key-" + UUID.randomUUID(),
         Instant.now().truncatedTo(ChronoUnit.MICROS));
-    transaction.executeWithoutResult(status -> transfers.save(transfer));
+    transaction.executeWithoutResult(status -> transfers.add(transfer));
     return transfer;
   }
 

@@ -83,7 +83,7 @@ public class TransferSagaService {
     var transfer = transfers.lockById(new TransferId(transferId))
         .orElseThrow(() -> new IllegalStateException("no transfer " + transferId));
     if (step.test(transfer, now())) {
-      transfers.save(transfer);
+      transfers.update(transfer);
       events.publish(next.apply(transfer));
     }
   }

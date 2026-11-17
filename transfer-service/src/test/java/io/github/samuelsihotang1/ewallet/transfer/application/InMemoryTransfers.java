@@ -39,7 +39,12 @@ class InMemoryTransfers implements TransferRepository, TransferEvents, WalletDir
   }
 
   @Override
-  public void save(Transfer transfer) {
+  public void add(Transfer transfer) {
+    transfers.put(transfer.id(), transfer);
+  }
+
+  @Override
+  public void update(Transfer transfer) {
     transfers.put(transfer.id(), transfer);
   }
 

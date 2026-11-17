@@ -33,7 +33,7 @@ class TransferSagaServiceTest {
   @BeforeEach
   void pendingTransfer() {
     transfer = Transfer.request(TransferId.random(), alice, bob, Money.of("40.00"), "key-1", NOW);
-    store.save(transfer);
+    store.add(transfer);
   }
 
   private UUID id() {

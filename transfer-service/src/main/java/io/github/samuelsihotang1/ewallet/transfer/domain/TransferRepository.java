@@ -15,6 +15,17 @@ public interface TransferRepository {
   /** The transfer the source wallet already requested with this key. */
   Optional<Transfer> findByIdempotencyKey(UUID sourceWalletId, String idempotencyKey);
 
-  /** Inserts a new transfer or updates a stored one. */
-  void save(Transfer transfer);
+  /**
+   * Stores a new transfer.
+   *
+   * @throws org.springframework.dao.DuplicateKeyException if the source already used the key
+   */
+  void add(Transfer transfer);
+
+  /**
+   * Stores the new state of a transfer read at {@link Transfer#version()}.
+   *
+   * @throws org.springframework.dao.OptimisticLockingFailureException if it changed since
+   */
+  void update(Transfer transfer);
 }

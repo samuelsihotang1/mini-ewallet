@@ -56,30 +56,13 @@ class JdbcTransferRepository implements TransferRepository {
   }
 
   /**
-   * Updates the row if it exists, else inserts it. The update also requires the version the
-   * transfer was read at, so a write that skipped the row lock cannot silently overwrite another.
-   *
-   * @throws org.springframework.dao.DuplicateKeyException if the source already used the key
-   * @throws OptimisticLockingFailureException if the row changed since it was read
+   * A plain INSERT. Concurrent copies of one request race on UNIQUE(source, key): the first
+   * commits, the others get {@link org.springframework.dao.DuplicateKeyException}. No read or
+   * update of the missing row comes first: under REPEATABLE READ that takes a gap lock, and
+   * concurrent inserts into the same gap deadlock (see ConcurrentRequestIT).
    */
   @Override
-  public void save(Transfer transfer) {
-    int updated = jdbc.sql("UPDATE transfer SET status = :status, failure_reason = :reason,"
-            + " updated_at = :updatedAt, version = version + 1"
-            + " WHERE id = :id AND version = :version")
-        .param("status", transfer.status().name())
-        .param("reason", transfer.failureReason())
-        .param("updatedAt", Timestamp.from(transfer.updatedAt()))
-        .param("id", transfer.id().toString())
-        .param("version", transfer.version())
-        .update();
-    if (updated == 1) {
-      return;
-    }
-    if (findById(transfer.id()).isPresent()) {
-      throw new OptimisticLockingFailureException(
-          "transfer " + transfer.id() + " changed since version " + transfer.version());
-    }
+  public void add(Transfer transfer) {
     jdbc.sql("INSERT INTO transfer (" + COLUMNS + ") VALUES (:id, :source, :sourceOwner,"
             + " :destination, :destinationOwner, :amount, :key, :status, :reason, :createdAt,"
             + " :updatedAt, 0)")
@@ -95,6 +78,28 @@ class JdbcTransferRepository implements TransferRepository {
         .param("createdAt", Timestamp.from(transfer.createdAt()))
         .param("updatedAt", Timestamp.from(transfer.updatedAt()))
         .update();
+  }
+
+  /**
+   * Writes the new state only if the row is still at the version it was read at, so a write that
+   * skipped the row lock cannot silently overwrite another.
+   */
+  @Override
+  public void update(Transfer transfer) {
+    int updated = jdbc.sql("UPDATE transfer SET status = :status, failure_reason = :reason,"
+            + " updated_at = :updatedAt, version = version + 1"
+            + " WHERE id = :id AND version = :version")
+        .param("status", transfer.status().name())
+        .param("reason", transfer.failureReason())
+        .param("updatedAt", Timestamp.from(transfer.updatedAt()))
+        .param("id", transfer.id().toString())
+        .param("version", transfer.version())
+        .update();
+    if (updated != 1) {
+      throw new OptimisticLockingFailureException(
+          "transfer " + transfer.id() + " is missing or changed since version "
+              + transfer.version());
+    }
   }
 
   private static Transfer map(ResultSet row, int rowNum) throws SQLException {

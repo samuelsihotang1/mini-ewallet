@@ -68,7 +68,7 @@ public class RequestTransferService {
         TransferId.random(), source, destination, command.amount(), command.idempotencyKey(), now);
     try {
       transaction.executeWithoutResult(status -> {
-        transfers.save(transfer);
+        transfers.add(transfer);
         events.publish(new TransferRequested(
             UUID.randomUUID(),
             transfer.id().value(),
