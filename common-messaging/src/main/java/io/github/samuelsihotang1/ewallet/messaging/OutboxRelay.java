@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 /**
@@ -46,7 +47,11 @@ public class OutboxRelay {
       Duration sendTimeout) {
     this.jdbc = jdbc;
     this.kafka = kafka;
-    this.transaction = transaction;
+    // READ COMMITTED: under REPEATABLE READ the claiming FOR UPDATE also locks the gap after
+    // the last pending row, and every new outbox insert (made while a service holds a wallet or
+    // transfer lock) would wait until this batch is acked. See RULES.md section 5.
+    this.transaction = new TransactionTemplate(transaction.getTransactionManager(), transaction);
+    this.transaction.setIsolationLevel(TransactionDefinition.ISOLATION_READ_COMMITTED);
     this.clock = clock;
     this.batchSize = batchSize;
     this.sendTimeout = sendTimeout;
