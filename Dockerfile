@@ -4,6 +4,7 @@ WORKDIR /src
 COPY .mvn .mvn
 COPY mvnw pom.xml ./
 COPY common-events/pom.xml common-events/
+COPY common-messaging/pom.xml common-messaging/
 COPY wallet-service/pom.xml wallet-service/
 COPY transfer-service/pom.xml transfer-service/
 COPY notification-service/pom.xml notification-service/

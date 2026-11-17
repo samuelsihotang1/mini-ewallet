@@ -91,6 +91,7 @@ services:
       DB_USER: transfer_svc
       DB_PASSWORD: transfer_pass
       SERVER_PORT: "8082"
+      WALLET_SERVICE_URL: http://wallet-service:8081
     ports:
       - "8082:8082"
     healthcheck: *service-health
