@@ -26,7 +26,11 @@ public record MessagingProperties(@DefaultValue Outbox outbox, @DefaultValue Ret
   /**
    * @param maxAttempts total deliveries of one record, the first included
    * @param initialInterval wait before the first retry; doubles on each further retry
+   * @param deadLetterSuffix appended to the topic name to park a record; a service-specific
+   *     suffix keeps two consumers of one topic from mixing their dead letters
    */
   public record Retry(
-      @DefaultValue("4") int maxAttempts, @DefaultValue("500ms") Duration initialInterval) {}
+      @DefaultValue("4") int maxAttempts,
+      @DefaultValue("500ms") Duration initialInterval,
+      @DefaultValue(".DLT") String deadLetterSuffix) {}
 }

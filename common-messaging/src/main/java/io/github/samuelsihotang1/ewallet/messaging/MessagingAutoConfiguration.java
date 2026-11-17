@@ -65,16 +65,17 @@ public class MessagingAutoConfiguration {
 
   /**
    * Retries a failing record with exponential backoff, then publishes it unchanged to
-   * {@code <topic>.DLT} and moves on, so one bad record cannot block its partition. An
-   * {@link UnreadableEventException} skips the retries: the same bytes will never parse.
-   * Spring Boot plugs this bean into every {@code @KafkaListener} container.
+   * {@code <topic><dead-letter-suffix>} and moves on, so one bad record cannot block its
+   * partition. An {@link UnreadableEventException} skips the retries: the same bytes will never
+   * parse. Spring Boot plugs this bean into every {@code @KafkaListener} container.
    */
   @Bean
   DefaultErrorHandler kafkaErrorHandler(
       KafkaTemplate<String, String> kafka, MessagingProperties properties) {
+    var suffix = properties.retry().deadLetterSuffix();
     var recoverer =
         new DeadLetterPublishingRecoverer(
-            kafka, (record, failure) -> new TopicPartition(record.topic() + ".DLT", -1));
+            kafka, (record, failure) -> new TopicPartition(record.topic() + suffix, -1));
     var backOff = new ExponentialBackOffWithMaxRetries(properties.retry().maxAttempts() - 1);
     backOff.setInitialInterval(properties.retry().initialInterval().toMillis());
     backOff.setMultiplier(2.0);
