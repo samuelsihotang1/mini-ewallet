@@ -76,7 +76,7 @@ class WalletApiIT {
 
     assertThat(retry.getStatusCode()).isEqualTo(HttpStatus.OK);
     assertThat(retry.getHeaders().getFirst("Idempotent-Replayed")).isEqualTo("true");
-    assertThat(json.readTree(retry.getBody()).get("topUpId")).isEqualTo(first.get("topUpId"));
+    assertThat(json.readTree(retry.getBody())).isEqualTo(first);
     assertThat(balanceOf(walletId)).isEqualTo("50000.00");
   }
 

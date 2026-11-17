@@ -63,6 +63,17 @@ class TopUpServiceTest {
   }
 
   @Test
+  void timestamps_are_cut_to_the_microseconds_the_database_keeps() {
+    var clock = Clock.fixed(Instant.parse("2026-11-17T08:08:47.277207900Z"), ZoneOffset.UTC);
+    var service = new TopUpService(store, store, store, clock);
+
+    var receipt = service.topUp(topUp("1000", "key-1"));
+
+    assertThat(receipt.createdAt()).isEqualTo(Instant.parse("2026-11-17T08:08:47.277207Z"));
+    assertThat(store.journals.getFirst().postedAt()).isEqualTo(receipt.createdAt());
+  }
+
+  @Test
   void different_keys_are_different_top_ups() {
     service.topUp(topUp("50000", "key-1"));
 
