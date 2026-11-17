@@ -3,6 +3,7 @@ package io.github.samuelsihotang1.ewallet.wallet.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.samuelsihotang1.ewallet.events.TopUpCompleted;
 import io.github.samuelsihotang1.ewallet.wallet.domain.IdempotencyKeyReusedException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.InvalidMoneyException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.JournalType;
@@ -23,7 +24,7 @@ class TopUpServiceTest {
 
   private final InMemoryStore store = new InMemoryStore();
   private final TopUpService service =
-      new TopUpService(store, store, store, Clock.fixed(NOW, ZoneOffset.UTC));
+      new TopUpService(store, store, store, store, Clock.fixed(NOW, ZoneOffset.UTC));
   private Wallet wallet;
 
   @BeforeEach
@@ -50,6 +51,20 @@ class TopUpServiceTest {
   }
 
   @Test
+  void a_top_up_announces_itself_once_even_when_retried() {
+    service.topUp(topUp("150000", "key-1"));
+    service.topUp(topUp("150000", "key-1"));
+
+    assertThat(store.published).singleElement().isInstanceOfSatisfying(TopUpCompleted.class, e -> {
+      assertThat(e.walletId()).isEqualTo(wallet.id().value());
+      assertThat(e.userId()).isEqualTo("user-1");
+      assertThat(e.amount()).isEqualTo("150000.00");
+      assertThat(e.balanceAfter()).isEqualTo("150000.00");
+      assertThat(e.occurredAt()).isEqualTo(NOW);
+    });
+  }
+
+  @Test
   void a_retry_with_the_same_key_returns_the_first_receipt_and_credits_once() {
     var first = service.topUp(topUp("50000", "key-1"));
 
@@ -65,7 +80,7 @@ class TopUpServiceTest {
   @Test
   void timestamps_are_cut_to_the_microseconds_the_database_keeps() {
     var clock = Clock.fixed(Instant.parse("2026-11-17T08:08:47.277207900Z"), ZoneOffset.UTC);
-    var service = new TopUpService(store, store, store, clock);
+    var service = new TopUpService(store, store, store, store, clock);
 
     var receipt = service.topUp(topUp("1000", "key-1"));
 

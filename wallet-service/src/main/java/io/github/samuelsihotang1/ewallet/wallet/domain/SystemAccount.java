@@ -10,7 +10,13 @@ import java.util.UUID;
  */
 public enum SystemAccount {
   /** Where top-up money enters the ledger from outside (bank, card, minimarket). */
-  TOP_UP_SOURCE("00000000-0000-0000-0000-000000000001");
+  TOP_UP_SOURCE("00000000-0000-0000-0000-000000000001"),
+
+  /**
+   * Holds the money of transfers between their debit and their credit or refund. Its balance is
+   * zero once every transfer has finished; anything else is money stuck in a saga.
+   */
+  TRANSFER_SUSPENSE("00000000-0000-0000-0000-000000000002");
 
   private final WalletId id;
 

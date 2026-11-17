@@ -70,7 +70,7 @@ class WalletQueryServiceTest {
 
   private void topUpAt(Wallet wallet, String amount, String key, String at) {
     var clock = Clock.fixed(Instant.parse(at), ZoneOffset.UTC);
-    new TopUpService(store, store, store, clock)
+    new TopUpService(store, store, store, store, clock)
         .topUp(new TopUpCommand(wallet.id(), Money.of(amount), key));
   }
 }

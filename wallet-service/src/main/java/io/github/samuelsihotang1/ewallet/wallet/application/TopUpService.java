@@ -23,7 +23,11 @@ public class TopUpService {
   private final Clock clock;
 
   public TopUpService(
-      WalletRepository wallets, JournalRepository journals, TopUpRepository topUps, Clock clock) {
+      WalletRepository wallets,
+      JournalRepository journals,
+      TopUpRepository topUps,
+      WalletEvents events,
+      Clock clock) {
     this.wallets = wallets;
     this.journals = journals;
     this.topUps = topUps;

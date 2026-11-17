@@ -46,6 +46,21 @@ public record Journal(
             new LedgerEntry(wallet.id(), Direction.CREDIT, amount, wallet.balance())));
   }
 
+  public static Journal transferOut(
+      JournalId id, Wallet source, Money amount, String transferId, Instant postedAt) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  public static Journal transferIn(
+      JournalId id, Wallet destination, Money amount, String transferId, Instant postedAt) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  public static Journal transferRefund(
+      JournalId id, Wallet source, Money amount, String transferId, Instant postedAt) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
   /** The sum of this journal's entries in one direction. */
   public Money total(Direction direction) {
     return sum(entries, direction);

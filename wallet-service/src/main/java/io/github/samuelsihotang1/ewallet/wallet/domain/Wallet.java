@@ -9,6 +9,9 @@ package io.github.samuelsihotang1.ewallet.wallet.domain;
  */
 public final class Wallet {
 
+  /** The most a wallet may hold, as for an unverified e-money account. */
+  public static final Money MAX_BALANCE = Money.of("20000000.00");
+
   private final WalletId id;
   private final String ownerId;
   private Money balance;

@@ -3,6 +3,8 @@ package io.github.samuelsihotang1.ewallet.wallet.config;
 import io.github.samuelsihotang1.ewallet.wallet.application.MutationReader;
 import io.github.samuelsihotang1.ewallet.wallet.application.OpenWalletService;
 import io.github.samuelsihotang1.ewallet.wallet.application.TopUpService;
+import io.github.samuelsihotang1.ewallet.wallet.application.TransferStepService;
+import io.github.samuelsihotang1.ewallet.wallet.application.WalletEvents;
 import io.github.samuelsihotang1.ewallet.wallet.application.WalletQueryService;
 import io.github.samuelsihotang1.ewallet.wallet.domain.JournalRepository;
 import io.github.samuelsihotang1.ewallet.wallet.domain.TopUpRepository;
@@ -30,8 +32,18 @@ public class WalletConfiguration {
 
   @Bean
   TopUpService topUpService(
-      WalletRepository wallets, JournalRepository journals, TopUpRepository topUps, Clock clock) {
-    return new TopUpService(wallets, journals, topUps, clock);
+      WalletRepository wallets,
+      JournalRepository journals,
+      TopUpRepository topUps,
+      WalletEvents events,
+      Clock clock) {
+    return new TopUpService(wallets, journals, topUps, events, clock);
+  }
+
+  @Bean
+  TransferStepService transferStepService(
+      WalletRepository wallets, JournalRepository journals, WalletEvents events, Clock clock) {
+    return new TransferStepService(wallets, journals, events, clock);
   }
 
   @Bean

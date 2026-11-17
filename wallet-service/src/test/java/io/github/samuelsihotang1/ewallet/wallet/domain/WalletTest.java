@@ -62,4 +62,22 @@ class WalletTest {
     assertThatThrownBy(() -> wallet.debit(Money.of("-1.00")))
         .isInstanceOf(InvalidMoneyException.class);
   }
+
+  @Test
+  void a_credit_past_the_balance_limit_is_rejected_and_balance_is_unchanged() {
+    var wallet = walletWith("19999999.99");
+
+    assertThatThrownBy(() -> wallet.credit(Money.of("0.02")))
+        .isInstanceOf(BalanceLimitExceededException.class);
+    assertThat(wallet.balance()).isEqualTo(Money.of("19999999.99"));
+  }
+
+  @Test
+  void a_credit_up_to_the_balance_limit_is_allowed() {
+    var wallet = walletWith("19999999.99");
+
+    wallet.credit(Money.of("0.01"));
+
+    assertThat(wallet.balance()).isEqualTo(Wallet.MAX_BALANCE);
+  }
 }

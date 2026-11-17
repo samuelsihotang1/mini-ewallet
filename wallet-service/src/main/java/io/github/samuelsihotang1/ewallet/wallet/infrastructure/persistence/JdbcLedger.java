@@ -31,6 +31,11 @@ class JdbcLedger implements JournalRepository, MutationReader {
   }
 
   @Override
+  public boolean exists(JournalType type, String reference) {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  @Override
   public void append(Journal journal) {
     jdbc.sql(
             "INSERT INTO journal (id, type, reference, posted_at)"
