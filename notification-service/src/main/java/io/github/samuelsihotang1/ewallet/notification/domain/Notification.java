@@ -16,4 +16,14 @@ public record Notification(
     NotificationType type,
     String message,
     UUID eventId,
-    Instant createdAt) {}
+    Instant createdAt) {
+
+  public Notification {
+    if (userId == null || userId.isBlank()) {
+      throw new IllegalArgumentException("a notification needs a recipient");
+    }
+    if (message == null || message.isBlank()) {
+      throw new IllegalArgumentException("a notification needs a message");
+    }
+  }
+}
