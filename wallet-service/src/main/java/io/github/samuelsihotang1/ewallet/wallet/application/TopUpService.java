@@ -1,5 +1,6 @@
 package io.github.samuelsihotang1.ewallet.wallet.application;
 
+import io.github.samuelsihotang1.ewallet.events.TopUpCompleted;
 import io.github.samuelsihotang1.ewallet.wallet.domain.IdempotencyKeyReusedException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.Journal;
 import io.github.samuelsihotang1.ewallet.wallet.domain.JournalId;
@@ -20,6 +21,7 @@ public class TopUpService {
   private final WalletRepository wallets;
   private final JournalRepository journals;
   private final TopUpRepository topUps;
+  private final WalletEvents events;
   private final Clock clock;
 
   public TopUpService(
@@ -31,6 +33,7 @@ public class TopUpService {
     this.wallets = wallets;
     this.journals = journals;
     this.topUps = topUps;
+    this.events = events;
     this.clock = clock;
   }
 
@@ -79,6 +82,14 @@ public class TopUpService {
     wallets.save(wallet);
     journals.append(journal);
     topUps.save(topUp);
+    events.publish(
+        new TopUpCompleted(
+            UUID.randomUUID(),
+            wallet.id().value(),
+            wallet.ownerId(),
+            command.amount().amount().toPlainString(),
+            wallet.balance().amount().toPlainString(),
+            now));
     return TopUpReceipt.of(topUp, false);
   }
 }

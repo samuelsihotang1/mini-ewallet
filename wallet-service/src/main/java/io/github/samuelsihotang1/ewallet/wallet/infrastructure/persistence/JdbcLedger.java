@@ -32,7 +32,12 @@ class JdbcLedger implements JournalRepository, MutationReader {
 
   @Override
   public boolean exists(JournalType type, String reference) {
-    throw new UnsupportedOperationException("not implemented");
+    return jdbc.sql("SELECT COUNT(*) FROM journal WHERE type = :type AND reference = :reference")
+            .param("type", type.name())
+            .param("reference", reference)
+            .query(Long.class)
+            .single()
+        > 0;
   }
 
   @Override

@@ -46,19 +46,58 @@ public record Journal(
             new LedgerEntry(wallet.id(), Direction.CREDIT, amount, wallet.balance())));
   }
 
+  /**
+   * Moves a transfer's money out of {@code source} into the transfer suspense account. Mutates
+   * {@code source}.
+   *
+   * @throws InsufficientBalanceException if the source holds less; nothing changes
+   */
   public static Journal transferOut(
       JournalId id, Wallet source, Money amount, String transferId, Instant postedAt) {
-    throw new UnsupportedOperationException("not implemented");
+    source.debit(amount);
+    return new Journal(
+        id,
+        JournalType.TRANSFER_OUT,
+        transferId,
+        postedAt,
+        List.of(
+            new LedgerEntry(source.id(), Direction.DEBIT, amount, source.balance()),
+            new LedgerEntry(SystemAccount.TRANSFER_SUSPENSE.id(), Direction.CREDIT, amount, null)));
   }
 
+  /**
+   * Moves a transfer's money from suspense into {@code destination}. Mutates {@code destination}.
+   *
+   * @throws BalanceLimitExceededException if the destination would pass its limit
+   */
   public static Journal transferIn(
       JournalId id, Wallet destination, Money amount, String transferId, Instant postedAt) {
-    throw new UnsupportedOperationException("not implemented");
+    destination.credit(amount);
+    return fromSuspense(id, JournalType.TRANSFER_IN, destination, amount, transferId, postedAt);
   }
 
+  /** Gives a transfer's money back from suspense to {@code source}; it cannot be refused. */
   public static Journal transferRefund(
       JournalId id, Wallet source, Money amount, String transferId, Instant postedAt) {
-    throw new UnsupportedOperationException("not implemented");
+    source.refund(amount);
+    return fromSuspense(id, JournalType.TRANSFER_REFUND, source, amount, transferId, postedAt);
+  }
+
+  private static Journal fromSuspense(
+      JournalId id,
+      JournalType type,
+      Wallet receiver,
+      Money amount,
+      String transferId,
+      Instant postedAt) {
+    return new Journal(
+        id,
+        type,
+        transferId,
+        postedAt,
+        List.of(
+            new LedgerEntry(SystemAccount.TRANSFER_SUSPENSE.id(), Direction.DEBIT, amount, null),
+            new LedgerEntry(receiver.id(), Direction.CREDIT, amount, receiver.balance())));
   }
 
   /** The sum of this journal's entries in one direction. */

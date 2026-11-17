@@ -1,5 +1,6 @@
 package io.github.samuelsihotang1.ewallet.wallet.api;
 
+import io.github.samuelsihotang1.ewallet.wallet.domain.BalanceLimitExceededException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.DomainException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.IdempotencyKeyReusedException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.InsufficientBalanceException;
@@ -84,6 +85,7 @@ class ApiExceptionHandler {
       case InvalidMoneyException ignored -> HttpStatus.BAD_REQUEST;
       case InsufficientBalanceException ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
       case TopUpLimitExceededException ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
+      case BalanceLimitExceededException ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
       case IdempotencyKeyReusedException ignored -> HttpStatus.UNPROCESSABLE_ENTITY;
       default -> HttpStatus.UNPROCESSABLE_ENTITY;
     };

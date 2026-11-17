@@ -37,8 +37,25 @@ public final class Wallet {
     return new Wallet(id, ownerId, balance, version);
   }
 
-  /** Adds a positive amount to the balance. */
+  /**
+   * Adds a positive amount to the balance.
+   *
+   * @throws BalanceLimitExceededException if the balance would pass {@link #MAX_BALANCE}
+   */
   void credit(Money amount) {
+    requirePositive(amount);
+    if (balance.plus(amount).isGreaterThan(MAX_BALANCE)) {
+      throw new BalanceLimitExceededException(id, balance, amount);
+    }
+    balance = balance.plus(amount);
+  }
+
+  /**
+   * Gives back money this wallet already sent. Unlike {@link #credit}, the balance limit does not
+   * apply: the money was this wallet's a moment ago, and a refund that could fail would leave it
+   * stuck in suspense.
+   */
+  void refund(Money amount) {
     requirePositive(amount);
     balance = balance.plus(amount);
   }
