@@ -9,6 +9,7 @@ import io.github.samuelsihotang1.ewallet.wallet.domain.TopUpRepository;
 import io.github.samuelsihotang1.ewallet.wallet.domain.WalletNotFoundException;
 import io.github.samuelsihotang1.ewallet.wallet.domain.WalletRepository;
 import java.time.Clock;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,7 +57,9 @@ public class TopUpService {
       return TopUpReceipt.of(earlier.get(), true);
     }
 
-    var now = clock.instant();
+    // MySQL TIMESTAMP(6) rounds anything finer than microseconds; cutting first keeps the
+    // replayed receipt identical to the first one.
+    var now = clock.instant().truncatedTo(ChronoUnit.MICROS);
     var topUpId = UUID.randomUUID();
     var journal =
         Journal.topUp(JournalId.random(), wallet, command.amount(), topUpId.toString(), now);
