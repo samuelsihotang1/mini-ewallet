@@ -8,6 +8,17 @@ is for developers and reviewers who want to run it and see how it works.
 peer-to-peer transfer with compensation, and notifications. The repository also
 has concurrency tests, end-to-end scenarios and a load test.
 
+## Demo
+
+https://github.com/user-attachments/assets/ab5e8f7d-f1db-4314-94a1-0902e357e126
+
+*Three minutes on the running stack, through each service's Swagger UI.
+Alice and Bob open wallets, and Alice tops up; a retry with the same
+`Idempotency-Key` is replayed, not credited twice. A transfer goes from
+`PENDING` to `COMPLETED` over the saga. A transfer larger than the balance
+ends `FAILED`. The video then shows the ledger history, notifications and
+the empty dead-letter list.*
+
 ## Stack
 
 Java 21, Spring Boot 3.5, Spring Data JPA and JDBC, Flyway, MySQL 8.4,
