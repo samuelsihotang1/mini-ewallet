@@ -2,12 +2,14 @@
 # The CI of this repo, run on this machine (there are no GitHub workflows).
 # Runs every job, then prints one summary line per job; exits 1 if any failed.
 #
-# Usage: scripts/ci-local.sh [build|compose|all]
+# Usage: scripts/ci-local.sh [build|compose|e2e|all]
 #   build    compile, unit tests (surefire), the JaCoCo gate (domain +
 #            application line coverage >= 85% from unit tests), integration
 #            tests (failsafe, Testcontainers: needs Docker running), then a
 #            coverage line per service
 #   compose  docker-compose.yml is valid
+#   e2e      builds and starts the compose stack, then runs the Cucumber
+#            scenarios against it (the stack is left running)
 # Env: JAVA_HOME may point at any JDK 21+; if it does not, a Temurin 21 under
 #      "C:/Program Files/Eclipse Adoptium" is used.
 set -uo pipefail
@@ -17,7 +19,7 @@ SUMMARY=()
 FAILED=0
 
 usage() {
-  sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'
+  sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 die() {
@@ -99,6 +101,13 @@ job_compose() {
   run_job compose docker compose config -q
 }
 
+job_e2e() {
+  ensure_jdk21
+  ensure_docker
+  run_job stack docker compose up -d --build --wait
+  run_job e2e ./mvnw -B -ntp -Pe2e -pl e2e-tests verify
+}
+
 # test_counts sums the <testsuite> attributes of every surefire and failsafe report.
 test_counts() {
   find "$ROOT" -path '*/target/*-reports/TEST-*.xml' -print0 2>/dev/null \
@@ -122,7 +131,8 @@ main() {
     -h|--help) usage; return 0 ;;
     build) job_build ;;
     compose) job_compose ;;
-    all) job_compose; job_build ;;
+    e2e) job_e2e ;;
+    all) job_compose; job_build; job_e2e ;;
     *) usage >&2; return 2 ;;
   esac
 
