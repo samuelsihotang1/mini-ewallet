@@ -3,8 +3,10 @@
 # Runs every job, then prints one summary line per job; exits 1 if any failed.
 #
 # Usage: scripts/ci-local.sh [build|compose|all]
-#   build    compile, unit tests (surefire) and integration tests (failsafe,
-#            Testcontainers: needs Docker running)
+#   build    compile, unit tests (surefire), the JaCoCo gate (domain +
+#            application line coverage >= 85% from unit tests), integration
+#            tests (failsafe, Testcontainers: needs Docker running), then a
+#            coverage line per service
 #   compose  docker-compose.yml is valid
 # Env: JAVA_HOME may point at any JDK 21+; if it does not, a Temurin 21 under
 #      "C:/Program Files/Eclipse Adoptium" is used.
@@ -67,6 +69,30 @@ job_build() {
   ensure_jdk21
   ensure_docker
   run_job build ./mvnw -B -ntp verify
+  run_job coverage coverage_report
+}
+
+# coverage_report prints domain + application line coverage per service. JaCoCo
+# skips its check silently when a module has no execution data, so a service
+# with domain or application code but no report fails here instead.
+coverage_report() {
+  local service csv sources status=0
+  for service in "$ROOT"/*-service; do
+    sources=$(find "$service/src/main/java" -type d \( -name domain -o -name application \) | head -1)
+    [[ -n "$sources" ]] || continue
+    csv="$service/target/site/jacoco/jacoco.csv"
+    if [[ ! -f "$csv" ]]; then
+      echo "$(basename "$service"): domain/application code but no coverage report" >&2
+      status=1
+      continue
+    fi
+    awk -F, -v name="$(basename "$service")" '
+      $2 ~ /\.(domain|application)$/ { missed += $8; covered += $9 }
+      END { printf "%s: domain+application line coverage %.1f%% (%d/%d)\n",
+              name, 100 * covered / (missed + covered), covered, missed + covered }
+    ' "$csv"
+  done
+  return "$status"
 }
 
 job_compose() {
@@ -104,6 +130,9 @@ main() {
   echo "== ci-local summary =="
   printf '%s\n' "${SUMMARY[@]}"
   test_counts
+  if [[ -f "$ROOT/target/ci-local/coverage.log" ]]; then
+    cat "$ROOT/target/ci-local/coverage.log"
+  fi
   return "$FAILED"
 }
 
