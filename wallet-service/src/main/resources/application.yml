@@ -5,7 +5,7 @@ spring:
   application:
     name: wallet-service
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/wallet_db
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/wallet_db?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
     username: ${DB_USER:wallet_svc}
     password: ${DB_PASSWORD:wallet_pass}
   jpa:

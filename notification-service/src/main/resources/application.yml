@@ -5,7 +5,7 @@ spring:
   application:
     name: notification-service
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/notification_db
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/notification_db?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
     username: ${DB_USER:notification_svc}
     password: ${DB_PASSWORD:notification_pass}
   jpa:

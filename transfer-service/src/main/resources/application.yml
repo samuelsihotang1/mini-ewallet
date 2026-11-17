@@ -5,7 +5,7 @@ spring:
   application:
     name: transfer-service
   datasource:
-    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/transfer_db
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/transfer_db?connectionTimeZone=UTC&forceConnectionTimeZoneToSession=true
     username: ${DB_USER:transfer_svc}
     password: ${DB_PASSWORD:transfer_pass}
   jpa:
